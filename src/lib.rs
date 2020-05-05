@@ -1,8 +1,11 @@
 extern crate reqwest;
 extern crate serde;
+extern crate toml;
 
 use std::env;
 use serde::{Deserialize};
+use std::process::Command;
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct Args {
@@ -22,6 +25,7 @@ impl Args {
     }
 }
 
+#[derive(Debug)]
 pub struct Config {
     user_name: String,
     password: String,
@@ -32,11 +36,11 @@ pub struct Config {
 impl Config {
     pub fn new() -> Self {
         // TODO: user_name, password, workspace はconfigコマンドで設定した値を読み取る
-        // TODO: repository_name は.gitファイルかoriginのリモートリポジトリ名を読み取る
         let user_name = env::var("USER_NAME").unwrap();
         let password = env::var("PASSWORD").unwrap();
         let workspace =  env::var("WORKSPACE").unwrap();
-        let repository_name =  env::var("REPOSITORY_NAME").unwrap();
+
+        let repository_name =  Config::read_repository_name();
 
         Config {
             user_name,
@@ -44,6 +48,17 @@ impl Config {
             workspace,
             repository_name,
         }
+    }
+
+    fn read_repository_name() -> String {
+        let url_output = Command::new("git")
+            .args(&["config","--get", "remote.origin.url"])
+            .output()
+            .expect("リモートリポジトリ名の取得に失敗しました");
+        let url = String::from_utf8(url_output.stdout).unwrap();
+        let repository_name = Path::new(&url).file_name().unwrap();
+
+        repository_name.to_str().unwrap().replace(".git", "").replace("\n", "")
     }
 }
 
@@ -83,7 +98,7 @@ struct PullRequests {
 
 fn pr_list(config: &Config) {
     let req_url = format!(
-        "https://api.bitbucket.org/2.0/repositories/{}/{}/pullrequests?q=state=\"open\"",
+        "https://api.bitbucket.org/2.0/repositories/{}/{}/pullrequests?q=state=\"merged\"",
         &config.workspace,
         &config.repository_name
     );
