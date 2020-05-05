@@ -4,7 +4,9 @@ extern crate dotenv;
 use std::env;
 use std::process;
 use dotenv::dotenv;
-use bb::{Args, Config, run};
+use bb::cmd::run;
+use bb::config::Config;
+use bb::args::Args;
 
 fn main() {
     dotenv().ok();
