@@ -26,7 +26,7 @@ struct PullRequests {
 
 pub fn list(config: &Config) {
     let req_url = format!(
-        "https://api.bitbucket.org/2.0/repositories/{}/{}/pullrequests?q=state=\"merged\"",
+        "https://api.bitbucket.org/2.0/repositories/{}/{}/pullrequests?q=state=\"open\"",
         &config.workspace,
         &config.repository_name
     );
