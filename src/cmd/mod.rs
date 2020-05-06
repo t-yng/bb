@@ -4,19 +4,24 @@ use crate::args::Args;
 
 mod pr;
 
-pub fn run(args: &Args, conf: &Config) {
-    match args.command.as_str() {
+pub fn run(args: &Args, conf: &Config) -> Result<(), String> {
+    let command = args.command.as_str();
+    match command {
         "pr" => pr(args, conf),
-        "config" => config(),
-        _ => println!("存在しないコマンドが指定されました。"),
+        "config" => Ok(config()),
+        _ => Err(format!("{} is not exists.", command)),
     }
 }
 
-fn pr(args: &Args, config: &Config) {
-    let sub_command = &args.sub_command.as_ref().expect("サブコマンドが指定されていません");
+fn pr(args: &Args, config: &Config) -> Result<(), String> {
+    let sub_command = match args.sub_command.as_ref() {
+        Some(v) => v,
+        None => return Err("You must set the sub-command for pr.".to_string()),
+    };
+
     match sub_command.as_str() {
-        "list" => pr::list(config),
-        _ => println!("存在しないサブコマンドが指定されました。"),
+        "list" => Ok(pr::list(config)),
+        _ => Err(format!("{} is not exists for pr.", sub_command)),
     }
 }
 

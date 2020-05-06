@@ -15,28 +15,28 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn read() -> Self {
-        // TODO: configファイルが存在しなかったらエラー
+    pub fn read() -> Result<Self, &'static str> {
+        // configファイルが存在しなかったらエラー
         if !Path::new(&Config::file()).exists() {
-            println!("設定が完了していません。bb config で設定を完了させてください。");
+            return Err("You must complete the setup before. Please execute \"bb config\"");
         }
 
         // configファイルから設定値を取得
         let toml_str = fs::read_to_string(&Config::file()).unwrap();
         let value: Value = toml::from_str(&toml_str).unwrap();
         let conf = value.get("default").unwrap();
-        let user_name = conf.get("user_name").unwrap().as_str().unwrap().to_string();
-        let password = conf.get("password").unwrap().as_str().unwrap().to_string();
-        let workspace = conf.get("workspace").unwrap().as_str().unwrap().to_string();
+        let user_name = conf.get("user_name").unwrap().to_string();
+        let password = conf.get("password").unwrap().to_string();
+        let workspace = conf.get("workspace").unwrap().to_string();
 
         let repository_name =  Config::read_repository_name();
 
-        Config {
+        Ok(Config {
             user_name,
             password,
             workspace,
             repository_name,
-        }
+        })
     }
 
     fn dir() -> String {

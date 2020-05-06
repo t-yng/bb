@@ -12,6 +12,14 @@ fn main() {
         println!("Problem parsing arguments {}", err);
         process::exit(1);
     });
-    let config = Config::read();
-    run(&args, &config);
+    let config = Config::read().unwrap_or_else(|err| {
+        println!("Problem read config file");
+        println!("{}", err);
+        process::exit(1);
+    });
+
+    run(&args, &config).unwrap_or_else(|err| {
+        println!("{}", err.as_str());
+        process::exit(1);
+    });
 }
