@@ -5,7 +5,7 @@ This is bibucket cli tool to get opened Bibucket PRs.
 ## Install
 
 ```sh
-$ curl https://github.com/t-yng/bb.git
+$ git clone https://github.com/t-yng/bb.git
 $ cd bb
 $ ./install.sh
 ```
