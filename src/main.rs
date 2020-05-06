@@ -13,8 +13,13 @@ fn main() {
         process::exit(1);
     });
     let config = Config::read().unwrap_or_else(|err| {
-        println!("Problem read config file \n{}", err);
+        println!("Problem read config file");
+        println!("{}", err);
         process::exit(1);
     });
-    run(&args, &config);
+
+    run(&args, &config).unwrap_or_else(|err| {
+        println!("{}", err.as_str());
+        process::exit(1);
+    });
 }
