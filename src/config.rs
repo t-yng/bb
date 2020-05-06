@@ -1,6 +1,10 @@
-use std::env;
+extern crate dirs;
+extern crate toml;
+
+use std::fs;
 use std::process::Command;
 use std::path::Path;
+use toml::{map::Map, Value};
 
 #[derive(Debug)]
 pub struct Config {
@@ -11,11 +15,19 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new() -> Self {
-        // TODO: user_name, password, workspace はconfigコマンドで設定した値を読み取る
-        let user_name = env::var("USER_NAME").unwrap();
-        let password = env::var("PASSWORD").unwrap();
-        let workspace =  env::var("WORKSPACE").unwrap();
+    pub fn read() -> Self {
+        // TODO: configファイルが存在しなかったらエラー
+        if !Path::new(&Config::file()).exists() {
+            println!("設定が完了していません。bb config で設定を完了させてください。");
+        }
+
+        // configファイルから設定値を取得
+        let toml_str = fs::read_to_string(&Config::file()).unwrap();
+        let value: Value = toml::from_str(&toml_str).unwrap();
+        let conf = value.get("default").unwrap();
+        let user_name = conf.get("user_name").unwrap().as_str().unwrap().to_string();
+        let password = conf.get("password").unwrap().as_str().unwrap().to_string();
+        let workspace = conf.get("workspace").unwrap().as_str().unwrap().to_string();
 
         let repository_name =  Config::read_repository_name();
 
@@ -25,6 +37,34 @@ impl Config {
             workspace,
             repository_name,
         }
+    }
+
+    fn dir() -> String {
+        // $HOME/.config/bb
+        let home = dirs::home_dir().unwrap();
+        format!("{}/.config/bb", home.to_str().unwrap())
+    }
+
+    fn file() -> String {
+        format!("{}/config", Config::dir())
+    }
+
+    pub fn create(user_name: String, password: String, workspace: String) {
+        let mut map = Map::new();
+        let mut table = Map::new();
+        map.insert("user_name".into(), Value::String(user_name));
+        map.insert("password".into(), Value::String(password));
+        map.insert("workspace".into(), Value::String(workspace));
+        table.insert("default".into(), Value::Table(map));
+
+        let toml_str = toml::to_string(&table).unwrap();
+
+        // ディレクトリ作成
+        if !Path::new(&Config::dir()).exists() {
+            fs::create_dir_all(&Config::dir()).unwrap();
+        }
+        // ファイル作成
+        fs::write(Config::file(), toml_str).unwrap();
     }
 
     fn read_repository_name() -> String {

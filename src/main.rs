@@ -16,6 +16,6 @@ fn main() {
         println!("Problem parsing arguments {}", err);
         process::exit(1);
     });
-    let config = Config::new();
+    let config = Config::read();
     run(&args, &config);
 }

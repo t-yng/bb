@@ -1,11 +1,6 @@
-extern crate dirs;
-extern crate toml;
-
-use std::fs;
 use std::io::{self, Write};
 use crate::config::Config;
 use crate::args::Args;
-use toml::{map::Map, Value};
 
 mod pr;
 
@@ -26,27 +21,13 @@ fn pr(args: &Args, config: &Config) {
 }
 
 fn config() {
-    // $HOME/.config/bb のディレクトリ作成
-    let home = dirs::home_dir().unwrap();
-    let dir = format!("{}/.config/bb", home.to_str().unwrap());
-    fs::create_dir_all(&dir).unwrap();
-
     // user_name,password,workspaceを対話的に取得
     let user_name = get_input("user_name: ");
     let password = get_input("password: ");
     let workspace = get_input("workspace: ");
 
     // .config/bb/config ファイルを作成
-    let mut map = Map::new();
-    let mut table = Map::new();
-    map.insert("user_name".into(), Value::String(user_name));
-    map.insert("password".into(), Value::String(password));
-    map.insert("workspace".into(), Value::String(workspace));
-    table.insert("default".into(), Value::Table(map));
-
-    let toml_str = toml::to_string(&table).unwrap();
-    let file_path = format!("{}/config", &dir);
-    fs::write(file_path, toml_str).unwrap();
+    Config::create(user_name, password, workspace);
 }
 
 fn get_input(prompt: &str) -> String {
