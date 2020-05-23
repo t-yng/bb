@@ -4,11 +4,21 @@ use crate::args::Args;
 
 mod pr;
 
-pub fn run(args: &Args, conf: &Config) -> Result<(), String> {
+pub fn run(args: &Args) -> Result<(), String> {
     let command = args.command.as_str();
+
+    // configコマンド実行時は設定ファイルが存在しない事もあるので先に処理する
+    if command == "config" {
+        return Ok(config());
+    }
+
+    let conf = match Config::read() {
+        Ok(c) => c,
+        Err(err) => return Err(err.to_string())
+    };
+
     match command {
-        "pr" => pr(args, conf),
-        "config" => Ok(config()),
+        "pr" => pr(args, &conf),
         _ => Err(format!("{} is not exists.", command)),
     }
 }
