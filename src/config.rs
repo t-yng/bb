@@ -25,9 +25,9 @@ impl Config {
         let toml_str = fs::read_to_string(&Config::file()).unwrap();
         let value: Value = toml::from_str(&toml_str).unwrap();
         let conf = value.get("default").unwrap();
-        let user_name = conf.get("user_name").unwrap().to_string();
-        let password = conf.get("password").unwrap().to_string();
-        let workspace = conf.get("workspace").unwrap().to_string();
+        let user_name = conf.get("user_name").unwrap().as_str().unwrap().to_string();
+        let password = conf.get("password").unwrap().as_str().unwrap().to_string();
+        let workspace = conf.get("workspace").unwrap().as_str().unwrap().to_string();
 
         let repository_name =  Config::read_repository_name();
 
