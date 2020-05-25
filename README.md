@@ -28,3 +28,18 @@ workspace: xxxx
 ```sh
 $ bb pr list
 ```
+
+## Advanced Usage
+
+You write alias bellow into your shell config file like `~/.zshrc`
+
+```
+alias gchpr='bb pr list | peco | xargs git checkout'
+```
+
+You can git checkout branch opened pr in one command.  
+
+```
+$ source ~/.zshrc
+$ gchpr
+```
